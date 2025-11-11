@@ -1,3 +1,4 @@
+
 // api/proxy.js
 
 /**
@@ -73,7 +74,9 @@ module.exports = async (req, res) => {
     res.status(response.status);
 
     const bodyBuffer = await response.arrayBuffer();
-    res.send(Buffer.from(bodyBuffer));
+    // Use res.end(), which is more fundamental and robust in Node.js environments
+    // than the Express-like res.send(). This can prevent invocation failures.
+    res.end(Buffer.from(bodyBuffer));
     
   } catch (error) {
     console.error('Proxy Error:', error);

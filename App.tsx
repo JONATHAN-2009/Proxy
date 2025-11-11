@@ -53,13 +53,25 @@ const App: React.FC = () => {
       }
       
       const content = await response.text();
-      const origin = new URL(finalUrl).origin;
-      const contentWithProxiedUrls = content.replace(/(href|src)=["'](\/(?!\/)[^"']*)["']/g, (match, attr, path) => {
-        const proxiedUrl = `/api/proxy?url=${encodeURIComponent(origin + path)}`;
-        return `${attr}="${proxiedUrl}"`;
-      });
+      const target = new URL(finalUrl);
 
-      setHtmlContent(contentWithProxiedUrls);
+      // Use a <base> tag to handle all relative URLs (e.g., /styles.css, images/logo.png).
+      // This is far more robust than regex replacements. The base href points
+      // back to our proxy, ensuring subsequent navigation stays within the proxy.
+      const baseHref = new URL(target.pathname, target.origin).href;
+      const proxyBaseHref = `/api/proxy?url=${encodeURIComponent(baseHref)}`;
+      const baseTag = `<base href="${proxyBaseHref}">`;
+
+      let processedContent;
+      // Inject the base tag right after the <head> tag for best results.
+      if (content.match(/<head[^>]*>/i)) {
+          processedContent = content.replace(/(<head[^>]*>)/i, `$1${baseTag}`);
+      } else {
+          // Fallback if no <head> tag is found
+          processedContent = baseTag + content;
+      }
+      
+      setHtmlContent(processedContent);
       setTargetUrl(finalUrl);
 
     } catch (err: any) {
