@@ -1,0 +1,5 @@
+{
+  "name": "Proxy Web Browser",
+  "description": "A sleek and simple web proxy that allows you to browse websites securely and anonymously. Enter a URL to start your proxied browsing session.",
+  "requestFramePermissions": []
+}
